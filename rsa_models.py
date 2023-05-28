@@ -90,78 +90,83 @@ class MATH:
 
 
 
+class RSA:
+    def __init__(self):
+        self.math = MATH()
 
-def rsa_generate_keys(bit_size:int)->dict:
-    keys = {"pub":{"max":0, "e":0}, 
-            "priv":{"max":0, "e":0}}
-    p = 0
-    q = 0
-    
-    e = 65537
-    d = 0
 
-    max_n = 0
-    max_phi = 0
-    
-    while not (p and q) or (p == q) or (MATH().gcd(max_phi, e) != 1):
+    def rsa_generate_keys(self, bit_size:int)->dict:
+        keys = {"pub":{"max":0, "e":0}, 
+                "priv":{"max":0, "e":0}}
+        p = 0
+        q = 0
         
-        gen_prime = MATH().generate_prime(2, bit_size)
-        p = gen_prime[0]
-        q = gen_prime[1]
+        e = (2 << 15) + 1 
+        d = 0
+
+        max_n = 0
+        max_phi = 0
         
-        max_n = p*q
-        max_phi = (p - 1)*(q - 1)
-        print("p : {} q : {} pq : {} max_phi : {}".format(p, q, max_n, max_phi))
+        while not (p and q) or (p == q) or (self.math.gcd(max_phi, e) != 1):
+            
+            gen_prime = self.math.generate_prime(2, bit_size)
+            p = gen_prime[0]
+            q = gen_prime[1]
+            
+            max_n = p*q
+            max_phi = (p - 1)*(q - 1)
+            print("p : {} q : {} pq : {} max_phi : {}".format(p, q, max_n, max_phi))
 
-        pass 
+            pass 
 
-    d = MATH().ext_euclid(max_phi, e)
+        d = self.math.ext_euclid(max_phi, e)
 
-    while d < 0:
-        d = d + max_phi
-    
-    keys["pub"] = {"max":max_n, "e":e}
-    keys["priv"] = {"max":max_n, "e":d}
-    
-    return keys
-
-
-def rsa_encrypt(msg:bytes, pub_key:dict)->list:
-    encrypted = []
-    
-    print('\noriginal    encrypted')
-    for s in msg:
-        encry = MATH().modular_exp(s, pub_key["e"], pub_key["max"])
-        if encry == -1:
-            return None
-
-        print("{} -> {}".format(s, encry))
-        encrypted.append(encry)
-   
-    return encrypted
+        while d < 0:
+            d = d + max_phi
+        
+        keys["pub"] = {"max":max_n, "e":e}
+        keys["priv"] = {"max":max_n, "e":d}
+        
+        return keys
 
 
-def rsa_decrypt(msg:list, priv_key:dict)->list:
-    decrypted = []
-    print('\nencrypted    original')
-    for s in msg:
-        decrypt = MATH().modular_exp(s, priv_key["e"] , priv_key["max"])
-        if decrypt == -1:
-            return None
-        print("{} -> {}".format(s, decrypt))
-        decrypted.append(decrypt)
+    def rsa_encrypt(self, msg:bytes, pub_key:dict)->list:
+        encrypted = []
+        
+        print('\noriginal    encrypted')
+        for s in msg:
+            encry = self.math.modular_exp(s, pub_key["e"], pub_key["max"])
+            if encry == -1:
+                return None
 
-    return decrypted
+            print("{} -> {}".format(s, encry))
+            encrypted.append(encry)
+       
+        return encrypted
 
-    
+
+    def rsa_decrypt(self, msg:list, priv_key:dict)->list:
+        decrypted = []
+        print('\nencrypted    original')
+        for s in msg:
+            decrypt = self.math.modular_exp(s, priv_key["e"] , priv_key["max"])
+            if decrypt == -1:
+                return None
+            print("{} -> {}".format(s, decrypt))
+            decrypted.append(decrypt)
+
+        return decrypted
+
+        
 
 if __name__ == "__main__":
     #MAIN
+    rsa = RSA()
 
     # 生成する鍵のながさ
-    keysize = 512
+    keysize = 16
 
-    gen_key = rsa_generate_keys(bit_size=keysize) 
+    gen_key = rsa.rsa_generate_keys(bit_size=keysize) 
     
     #共有鍵
     pub_key = gen_key["pub"]
@@ -175,12 +180,12 @@ if __name__ == "__main__":
     msg = base64.b64encode(msg.encode()) 
     
     #暗号化する
-    msg_encrypte = rsa_encrypt(msg, pub_key)
+    msg_encrypte = rsa.rsa_encrypt(msg, pub_key)
     print(msg_encrypte) 
     
     #復号化する
-    msg_decrypt = rsa_decrypt(msg_encrypte, priv_key)
+    msg_decrypt = rsa.rsa_decrypt(msg_encrypte, priv_key)
     print(msg_decrypt)    
-
+    
 
 #end 
