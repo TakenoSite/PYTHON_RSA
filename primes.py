@@ -60,19 +60,3 @@ def generate_prime(bit_size:int)->int:
     return ret
 
 # end
-
-if __name__ == "__main__":
-    
-    
-    res = generate_prime(1024)
-    
-    n_len = len(list(str(res)))
-    
-    print("{} : {}".format(res, n_len))
-
-
-
-
-
-    pass
-

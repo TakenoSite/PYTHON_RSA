@@ -9,18 +9,25 @@ class RSA:
 
         self.keys_len = keys_len // 8
 
-
     def padding(self, payloads:bytes, key_len:int):
+        """
+        padding is a very important element in encryption. 
+        This padding is a very simple example.
+        """
         hash_value = self.util.hash_md5(payloads)
          
         padding_length = key_len - len(payloads) - len(hash_value) - 2
         if padding_length < 0:
             raise ValueError("Plaintext is too long.")
-        
+        """
+        The length of ciphertext per block is proportional 
+        to the length of the key to be created.
+        """
+
         padding = b'\x00' * (padding_length)
         padded_message = b'\x00' + hash_value + padding + b'\x01' + payloads
         c = self.util.bytes_to_long(padded_message)
-
+        
         return c
 
 
@@ -36,6 +43,9 @@ class RSA:
         max_n = 0
         max_phi = 0
         
+        if bit_size < 1024:
+            raise ValueError("Select 1024bit or more")
+
         while not (p and q) or (p == q) or (self.math.gcd(max_phi, e) != 1):
             
             size_prime = bit_size // 2
@@ -46,7 +56,7 @@ class RSA:
 
             max_n = p*q
             max_phi = (p - 1)*(q - 1)
-            
+             
 
         d = self.math.ext_euclid(max_phi, e)
         while d < 0:
@@ -59,10 +69,10 @@ class RSA:
 
     def rsa_encrypt(self, msg:bytes, pub_key:dict)->list:
         encrypted = []
-        # メッセージをパディングする
+        # パディングする, to padding 
         pd = [self.padding(msg, self.keys_len)]
         for s in pd:
-            #共通鍵で暗号化数r
+            #共通鍵で暗号化. Encryption with publik key
             encry = self.math.modular_exp(s, pub_key["e"], pub_key["max"])
             if encry == -1:
                 return None
