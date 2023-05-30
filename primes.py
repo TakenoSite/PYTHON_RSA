@@ -12,8 +12,8 @@ def modular_exp(a, b, n):
     return res
 
 
-def gen_rand(bytes_length):
-    bits = [random.randint(0,1) for _ in range(bytes_length - 2)]
+def gen_rand(bit_length):
+    bits = [random.randint(0,1) for _ in range(bit_length - 2)]
     ret = 1
     for b in bits:
         ret = ret * 2 + int(b)
@@ -50,13 +50,29 @@ def mr_primary_test(n, k=10):
     return True
 
 
-def generate_prime(bytes_n:int)->int:
+def generate_prime(bit_size:int)->int:
     count = 0
     while True:
-        ret = gen_rand(bytes_n)
+        ret = gen_rand(bit_size)
         if mr_primary_test(ret):
             break
         count += 1
     return ret
 
 # end
+
+if __name__ == "__main__":
+    
+    
+    res = generate_prime(1024)
+    
+    n_len = len(list(str(res)))
+    
+    print("{} : {}".format(res, n_len))
+
+
+
+
+
+    pass
+

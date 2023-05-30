@@ -1,5 +1,4 @@
 from util import UTIL
-from hashlib import md5
 
 import base64
 import primes
@@ -83,11 +82,11 @@ class MATH:
         #print("ExtEuclid : ", y) #debug 
         return  y
 
-    def generate_prime(self, gen_len:int, bytes_size:int)->list:
+    def generate_prime(self, gen_len:int, bit_size:int)->list:
         big_primes_list = []
         
         for _ in range(gen_len):
-            res = primes.generate_prime(bytes_size)
+            res = primes.generate_prime(bit_size)
             big_primes_list.append(res)
 
         return big_primes_list
@@ -99,7 +98,7 @@ class RSA:
         self.math = MATH()
         self.util = UTIL()
 
-        self.keys_len = 128
+        self.keys_len = keys_len // 8
 
 
     def padding(self, payloads:bytes, key_len:int):
@@ -109,7 +108,7 @@ class RSA:
         if padding_length < 0:
             raise ValueError("Plaintext is too long.")
         
-        padding = b'\x00' * padding_length
+        padding = b'\x00' * (padding_length)
         padded_message = b'\x00' + hash_value + padding + b'\x01' + payloads
         c = self.util.bytes_to_long(padded_message)
 
@@ -123,18 +122,18 @@ class RSA:
         p = 0
         q = 0
         
-        e = (2 << 15) + 1 
+        e = (2 << 16) + 1  # 範囲設定 
         d = 0
-
+        
         max_n = 0
         max_phi = 0
         
         while not (p and q) or (p == q) or (self.math.gcd(max_phi, e) != 1):
             
-            gen_prime = self.math.generate_prime(2, bit_size)
+            gen_prime = self.math.generate_prime(2, bit_size // 2)
             p = gen_prime[0]
             q = gen_prime[1]
-            
+
             max_n = p*q
             max_phi = (p - 1)*(q - 1)
             #print("p : {} q : {} pq : {} max_phi : {}".format(p, q, max_n, max_phi))
@@ -181,15 +180,16 @@ class RSA:
             
             dhash = dbytes[:16].hex()
             dpayload = dbytes[16:]
-            
 
+            # payload取り出し
             start_index = dpayload.split(b"\x01")
             if len(start_index) == 0:
                 return None
-
+            
             mpayloads = start_index[1]
             phash = self.util.hash_md5(mpayloads).hex()
             
+            # hashを比較して整合性チェック
             if phash != dhash:
                 return None
             
@@ -198,19 +198,18 @@ class RSA:
         return decrypted
     
 
-        
-        
-
-
-
 if __name__ == "__main__":
     #MAIN
 
     # 生成する鍵のながさ
-    keysize = 512
+    keysize = 1024 #bit 
+    print("keys_length : {} bit".format(keysize))
+
     rsa = RSA(keysize)
    
+    print("generate rsa keys ...")
     gen_key = rsa.rsa_generate_keys(bit_size=keysize) 
+    print("Comp") 
     
     #共有鍵
     pub_key = gen_key["pub"]
@@ -219,24 +218,39 @@ if __name__ == "__main__":
     
     priv_key_e = priv_key["e"]
     priv_key_max = priv_key["max"]
-
-    print("\npub_keys : {}\n\npriv_keys : {}".format(pub_key, priv_key))
+    
+         
+    
+    #print("\npub_keys : {}\n\npriv_keys : {}".format(pub_key, priv_key))
     priv_key_bytes = "{} {}".format(UTIL().long_to_bytes(priv_key_e).hex(),
             UTIL().long_to_bytes(priv_key_max).hex())
     priv_key_base64 = base64.b64encode(priv_key_bytes.encode())
 
     # 平文
-    msg = b"aaa"
+    msg = b"0"
     #msg = base64.b64encode(msg.encode()) 
-
-    
-    #暗号化する
-    msg_encrypte = rsa.rsa_encrypt(msg, pub_key)
-    print("\n",msg_encrypte[0], len(list(str(msg_encrypte[0])))) 
     
 
-    #復号化する
-    msg_decrypt = rsa.rsa_decrypt(msg_encrypte, priv_key)
-    print("\n",msg_decrypt)    
+    
+    for i in range(1):        
+        #暗号化する
+        msg_encrypte = rsa.rsa_encrypt(msg, pub_key)
+        
+
+        encrypted_dec = msg_encrypte[0]
+        encrypted_dec_len = len(list(str(msg_encrypte[0]))) 
+        
+        encrypted_bytes = UTIL().long_to_bytes(msg_encrypte[0]).hex()
+        encrypted_bytes_len = len(list(str(encrypted_bytes)))
+        
+        print("\n----- encryp msg ------ \ndec : {} -> {} \n\nbytes : {} ->{} \n----------------------- "
+                .format(msg_encrypte[0], len(list(str(msg_encrypte[0]))), UTIL().long_to_bytes(msg_encrypte[0]).hex(), encrypted_bytes_len)) 
+                 
+        
+        #復号化する
+        msg_decrypt = rsa.rsa_decrypt(msg_encrypte, priv_key)
+        
+        print("\n----- encryp msg ------ \n{}\n-----------------------"
+                .format(msg_decrypt))
 
 #end

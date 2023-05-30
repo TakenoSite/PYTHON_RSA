@@ -63,14 +63,15 @@ def crypto():
     from Crypto.Cipher import PKCS1_OAEP
 
     # 公開鍵の生成
-    key = RSA.generate(4096)
+    key = RSA.generate(1024) #bit
+    
     public_key = key.publickey()
 
     # OAEPパディングと公開鍵暗号化の準備
     cipher_rsa = PKCS1_OAEP.new(public_key)
 
     # メッセージの準備
-    message = b't'*10
+    message = b't'*1
     # OAEPパディングと公開鍵暗号化を実行
     encrypted_message = cipher_rsa.encrypt(message)
 
