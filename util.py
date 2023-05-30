@@ -157,5 +157,6 @@ class UTIL:
 
         return hash_value
 
-
+    def long_len(self, i:int)->int:
+        return len(list(str(i)))
 # end
