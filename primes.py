@@ -50,10 +50,10 @@ def mr_primary_test(n, k=10):
     return True
 
 
-def generate_prime(bit:int)->int:
+def generate_prime(bit_size:int)->int:
     count = 0
     while True:
-        ret = gen_rand(bit)
+        ret = gen_rand(bit_size)
         if mr_primary_test(ret):
             break
         count += 1
