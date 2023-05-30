@@ -23,6 +23,7 @@
 
 import struct 
 import sys
+import hashlib
 
 
 class UTIL:
@@ -147,6 +148,13 @@ class UTIL:
             split_data_list.append(packet)
             
         return  split_data_list
+
+    def hash_md5(self, s:bytes)->bytes:
+        hash_func = hashlib.md5()
+        hash_func.update(s)
+        hash_value = hash_func.digest()
+
+        return hash_value
 
 
 # end

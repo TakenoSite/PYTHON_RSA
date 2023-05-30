@@ -79,8 +79,8 @@ class MATH:
             u   = m 
             v   = n
             
-            #print(q,r,m,n,gcd,a,x,y,u,v)
-        print("ExtEuclid : ", y)
+            #print(q,r,m,n,gcd,a,x,y,u,v) # debug 
+        #print("ExtEuclid : ", y) #debug 
         return  y
 
     def generate_prime(self, gen_len:int, bytes_size:int)->list:
@@ -103,10 +103,7 @@ class RSA:
 
 
     def padding(self, payloads:bytes, key_len:int):
-        hash_func = md5() 
-        hash_func.update(payloads)
-        hash_value = hash_func.digest()
-        
+        hash_value = self.util.hash_md5(payloads)
          
         padding_length = key_len - len(payloads) - len(hash_value) - 2
         if padding_length < 0:
@@ -158,13 +155,13 @@ class RSA:
         encrypted = []
         pd = [self.padding(msg, self.keys_len)]
          
-        print('\noriginal    encrypted')
+        #print('\noriginal    encrypted') # debug 
         for s in pd:
             encry = self.math.modular_exp(s, pub_key["e"], pub_key["max"])
             if encry == -1:
                 return None
 
-            print("{} -> {}".format(s, encry))
+            #print("{} -> {}".format(s, encry))
             encrypted.append(encry)
        
         return encrypted
@@ -172,19 +169,38 @@ class RSA:
 
     def rsa_decrypt(self, msg:list, priv_key:dict)->list:
         decrypted = []
-        print('\nencrypted    original')
+        #print('\nencrypted    original')
         for s in msg:
             decrypt = self.math.modular_exp(s, priv_key["e"] , priv_key["max"])
             if decrypt == -1:
                 return None
-            print("{} -> {}".format(s, decrypt))
-            decrypted.append(self.util.long_to_bytes(decrypt))
+            #print("{} -> {}".format(s, decrypt)) #debug 
+
+            
+            dbytes = self.util.long_to_bytes(decrypt)
+            
+            dhash = dbytes[:16].hex()
+            dpayload = dbytes[16:]
+            
+
+            start_index = dpayload.split(b"\x01")
+            if len(start_index) == 0:
+                return None
+
+            mpayloads = start_index[1]
+            phash = self.util.hash_md5(mpayloads).hex()
+            
+            if phash != dhash:
+                return None
+            
+            decrypted.append(mpayloads)
 
         return decrypted
     
 
-
         
+        
+
 
 
 if __name__ == "__main__":
@@ -193,7 +209,7 @@ if __name__ == "__main__":
     # 生成する鍵のながさ
     keysize = 512
     rsa = RSA(keysize)
-
+   
     gen_key = rsa.rsa_generate_keys(bit_size=keysize) 
     
     #共有鍵
@@ -205,17 +221,13 @@ if __name__ == "__main__":
     priv_key_max = priv_key["max"]
 
     print("\npub_keys : {}\n\npriv_keys : {}".format(pub_key, priv_key))
-    
     priv_key_bytes = "{} {}".format(UTIL().long_to_bytes(priv_key_e).hex(),
             UTIL().long_to_bytes(priv_key_max).hex())
     priv_key_base64 = base64.b64encode(priv_key_bytes.encode())
-    
-    print(priv_key_base64)
-
 
     # 平文
-    msg = "よくやったね"
-    msg = base64.b64encode(msg.encode()) 
+    msg = b"aaa"
+    #msg = base64.b64encode(msg.encode()) 
 
     
     #暗号化する
