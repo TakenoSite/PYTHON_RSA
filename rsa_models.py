@@ -119,5 +119,35 @@ class RSA:
             decrypted.append(mpayloads)
 
         return decrypted
- 
+    
+    
+    
+    def certificate(self, doc:bytes, priv_key:dict)->dict:
+        
+        value = {
+                "doc" : None,
+                "certificate":None
+                }
+        
+        to_long = self.util.bytes_to_long(doc)
+
+        gen_proof = self.math.modular_exp(to_long, priv_key["e"], priv_key["max"])
+        if gen_proof == -1:
+            return None
+        
+        value["doc"] =  doc
+        value["certificate"] = gen_proof
+
+        return value
+    
+    
+    def certificate_proof(self, c, pub_keys:dict):
+        
+        proof = self.math.modular_exp(c, pub_keys["e"], pub_keys["max"])
+        if proof == -1:
+            return None 
+
+        return proof
+
+
 #end

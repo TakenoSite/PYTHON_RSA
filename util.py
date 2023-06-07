@@ -156,6 +156,14 @@ class UTIL:
         hash_value = hash_func.digest()
 
         return hash_value
+    
+    def hash_sha2(self, s:bytes)->bytes:
+        hash_func = hashlib.sha256()
+        hash_func.update(s)
+        hash_value = hash_func.digest()
+
+        return hash_value
+
 
     def long_len(self, i:int)->int:
         return len(list(str(i)))
