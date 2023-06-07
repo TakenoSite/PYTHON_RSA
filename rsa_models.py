@@ -33,11 +33,14 @@ class RSA:
 
     def rsa_generate_keys(self, bit_size:int)->dict:
         keys = {"pub":{"max":0, "e":0}, 
-                "priv":{"max":0, "e":0}}
+                "priv":{"max":0, "e":0},
+                "prime1":0,
+                "prime2":0 }
+        
         p = 0
         q = 0
         
-        e = (2 << 16) + 1  # 範囲設定 
+        e = (2 << 15) + 1  # 範囲設定 
         d = 0
         
         max_n = 0
@@ -62,8 +65,11 @@ class RSA:
         while d < 0:
             d = d + max_phi
         
-        keys["pub"] = {"max":max_n, "e":e}
-        keys["priv"] = {"max":max_n, "e":d}
+        keys["pub"]     = {"max":max_n, "e":e}
+        keys["priv"]    = {"max":max_n, "e":d}
+        keys["prime1"]  = p
+        keys["prime2"]  = q
+
         return keys
 
 
