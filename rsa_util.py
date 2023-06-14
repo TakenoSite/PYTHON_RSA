@@ -24,7 +24,8 @@
 import struct 
 import sys
 import hashlib
-
+import random
+import string
 
 class UTIL:
     def __init__(self):
@@ -167,4 +168,17 @@ class UTIL:
 
     def long_len(self, i:int)->int:
         return len(list(str(i)))
+
+    
+    def random_string(self, s_len:int)->str:
+        return "".join(random.choices(string.ascii_letters + string.digits, k=s_len))
+    
+    
+    def file_write(self, data:str, filename:str):
+        f = open(filename, mode="w")
+        f.write(str(data.decode()))
+        f.close() 
+        
+        
+
 # end
